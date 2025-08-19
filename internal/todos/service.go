@@ -1,31 +1,29 @@
-package service
+package todos
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/drago44/golang-todo-api/internal/models"
-	"github.com/drago44/golang-todo-api/internal/repository"
 	"gorm.io/gorm"
 )
 
 type TodoService interface {
-	CreateTodo(req *models.CreateTodoRequest) (*models.Todo, error)
-	GetAllTodos() ([]models.Todo, error)
-	GetTodoByID(id uint) (*models.Todo, error)
-	UpdateTodo(id uint, req *models.UpdateTodoRequest) (*models.Todo, error)
+	CreateTodo(req *CreateTodoRequest) (*Todo, error)
+	GetAllTodos() ([]Todo, error)
+	GetTodoByID(id uint) (*Todo, error)
+	UpdateTodo(id uint, req *UpdateTodoRequest) (*Todo, error)
 	DeleteTodo(id uint) error
 }
 
 type todoService struct {
-	todoRepo repository.TodoRepository
+	todoRepo TodoRepository
 }
 
-func NewTodoService(todoRepo repository.TodoRepository) TodoService {
+func NewTodoService(todoRepo TodoRepository) TodoService {
 	return &todoService{todoRepo: todoRepo}
 }
 
-func (s *todoService) CreateTodo(req *models.CreateTodoRequest) (*models.Todo, error) {
+func (s *todoService) CreateTodo(req *CreateTodoRequest) (*Todo, error) {
 	// 1. Check if title is required
 	if req.Title == "" {
 		return nil, errors.New("title is required")
@@ -43,7 +41,7 @@ func (s *todoService) CreateTodo(req *models.CreateTodoRequest) (*models.Todo, e
 	}
 
 	// 3. Create a new Todo
-	todo := &models.Todo{
+	todo := &Todo{
 		Title:       req.Title,
 		Description: req.Description,
 		Completed:   false,
@@ -57,15 +55,15 @@ func (s *todoService) CreateTodo(req *models.CreateTodoRequest) (*models.Todo, e
 	return todo, nil
 }
 
-func (s *todoService) GetAllTodos() ([]models.Todo, error) {
+func (s *todoService) GetAllTodos() ([]Todo, error) {
 	return s.todoRepo.GetAll()
 }
 
-func (s *todoService) GetTodoByID(id uint) (*models.Todo, error) {
+func (s *todoService) GetTodoByID(id uint) (*Todo, error) {
 	return s.todoRepo.GetByID(id)
 }
 
-func (s *todoService) UpdateTodo(id uint, req *models.UpdateTodoRequest) (*models.Todo, error) {
+func (s *todoService) UpdateTodo(id uint, req *UpdateTodoRequest) (*Todo, error) {
 	// 1. Get the existing Todo
 	todo, err := s.todoRepo.GetByID(id)
 	if err != nil {

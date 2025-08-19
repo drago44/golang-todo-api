@@ -1,24 +1,33 @@
-package handlers
+package todos
 
 import (
 	"net/http"
 	"strconv"
 
-	"github.com/drago44/golang-todo-api/internal/models"
-	"github.com/drago44/golang-todo-api/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
 type TodoHandler struct {
-	todoService service.TodoService
+	todoService TodoService
 }
 
-func NewTodoHandler(todoService service.TodoService) *TodoHandler {
+func NewTodoHandler(todoService TodoService) *TodoHandler {
 	return &TodoHandler{todoService: todoService}
 }
 
+func (h *TodoHandler) RegisterTodoRoutes(rg *gin.RouterGroup) {
+	todos := rg.Group("/todos")
+	{
+		todos.POST("/", h.CreateTodo)
+		todos.GET("/", h.GetAllTodos)
+		todos.GET("/:id", h.GetTodoByID)
+		todos.PUT("/:id", h.UpdateTodo)
+		todos.DELETE("/:id", h.DeleteTodo)
+	}
+}
+
 func (h *TodoHandler) CreateTodo(c *gin.Context) {
-	var req models.CreateTodoRequest
+	var req CreateTodoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -67,7 +76,7 @@ func (h *TodoHandler) UpdateTodo(c *gin.Context) {
 		return
 	}
 
-	var req models.UpdateTodoRequest
+	var req UpdateTodoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
