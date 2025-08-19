@@ -1,4 +1,4 @@
-package config
+package app
 
 import (
 	"os"
@@ -30,7 +30,7 @@ func Load() (*Config, error) {
 			Host: getEnv("HOST", "localhost"),
 		},
 		Database: DatabaseConfig{
-			URL: getEnv("DATABASE_URL", "sqlite://todo.db"),
+			URL: getEnv("DATABASE_URL", "data/app.db"),
 		},
 	}, nil
 }
