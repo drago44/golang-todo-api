@@ -28,9 +28,13 @@ func Run() {
 	container := dig.New()
 
 	// Provide core singletons
-	container.Provide(func() *Config { return cfg })
-	container.Provide(func() *gorm.DB { return db })
-	container.Provide(func() *gin.Engine {
+	if err := container.Provide(func() *Config { return cfg }); err != nil {
+		log.Fatal(err)
+	}
+	if err := container.Provide(func() *gorm.DB { return db }); err != nil {
+		log.Fatal(err)
+	}
+	if err := container.Provide(func() *gin.Engine {
 		engine := gin.New()
 		engine.Use(Logger(), Recovery(), CORS(), RateLimit())
 		// TODO: Add trusted proxies
@@ -38,7 +42,9 @@ func Run() {
 			log.Fatal(err)
 		}
 		return engine
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
 
 	for _, module := range []func(*dig.Container) error{
 		todos.Module,
@@ -48,14 +54,18 @@ func Run() {
 		}
 	}
 
-	container.Provide(router.New)
+	if err := container.Provide(router.New); err != nil {
+		log.Fatal(err)
+	}
 
-	container.Invoke(func(router *router.Router, cfg *Config) {
+	if err := container.Invoke(func(router *router.Router, cfg *Config) {
 		log.Printf("Server started on %s:%s", cfg.Server.Host, cfg.Server.Port)
 		err := router.GetEngine().Run(cfg.Server.Host + ":" + cfg.Server.Port)
 		if err != nil {
 			log.Fatal(err)
 		}
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
 
 }
