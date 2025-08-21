@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -21,8 +22,10 @@ type DatabaseConfig struct {
 }
 
 func Load() (*Config, error) {
-	// Завантажуємо .env файл
-	godotenv.Load()
+	// Load .env file (non-fatal if missing)
+	if err := godotenv.Load(); err != nil {
+		log.Printf(".env not loaded: %v", err)
+	}
 
 	return &Config{
 		Server: ServerConfig{
