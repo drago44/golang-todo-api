@@ -8,7 +8,7 @@ type TodoRepository interface {
 	Create(todo *Todo) error
 	GetAll() ([]Todo, error)
 	GetByID(id uint) (*Todo, error)
-	GetByTitle(title string) (*Todo, error)
+	ExistsByTitle(title string) (bool, error)
 	Update(id uint, todo *Todo) error
 	Delete(id uint) error
 }
@@ -37,10 +37,12 @@ func (r *todoRepository) GetByID(id uint) (*Todo, error) {
 	return &todo, err
 }
 
-func (r *todoRepository) GetByTitle(title string) (*Todo, error) {
-	var todo Todo
-	err := r.db.Where("title = ?", title).First(&todo).Error
-	return &todo, err
+func (r *todoRepository) ExistsByTitle(title string) (bool, error) {
+	var count int64
+	if err := r.db.Model(&Todo{}).Where("title = ?", title).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }
 
 func (r *todoRepository) Update(id uint, todo *Todo) error {

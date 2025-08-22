@@ -20,7 +20,8 @@ help:
 	&& echo "  make fmt             - go fmt ./..." \
 	&& echo "  make vet             - go vet ./..." \
 	&& echo "  make lint            - golangci-lint run (if installed)" \
-	&& echo "  make clean           - clean build artifacts and coverage files"
+	&& echo "  make clean           - clean build artifacts and coverage files" \
+	&& echo "  make demo            - run demo"
 
 # Tests
 test:
@@ -73,4 +74,5 @@ lint:
 clean:
 	rm -rf $(BIN_DIR) coverage.out coverage.html
 
-
+demo:
+	./scripts/demo.sh

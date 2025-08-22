@@ -37,11 +37,16 @@ func TestRepository_CRUD(t *testing.T) {
 	assert.Equal(t, "A", got.Title)
 	t.Logf("fetched by id: %+v", got)
 
-	// GetByTitle
-	byTitle, err := repo.GetByTitle("A")
+	// ExistsByTitle
+	exists, err := repo.ExistsByTitle("A")
 	assert.NoError(t, err)
-	assert.Equal(t, todo.ID, byTitle.ID)
-	t.Logf("fetched by title: %+v", byTitle)
+	assert.True(t, exists)
+	t.Logf("exists by title 'A': %v", exists)
+
+	notExists, err := repo.ExistsByTitle("B")
+	assert.NoError(t, err)
+	assert.False(t, notExists)
+	t.Logf("exists by title 'B': %v", notExists)
 
 	// GetAll
 	list, err := repo.GetAll()

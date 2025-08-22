@@ -3,8 +3,6 @@ package todos
 import (
 	"errors"
 	"fmt"
-
-	"gorm.io/gorm"
 )
 
 type TodoService interface {
@@ -30,13 +28,11 @@ func (s *todoService) CreateTodo(req *CreateTodoRequest) (*Todo, error) {
 	}
 
 	// 2. Check if title already exists in the database
-	existingTodo, err := s.todoRepo.GetByTitle(req.Title)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		// If the error is not "record not found", then it's a database error
+	exists, err := s.todoRepo.ExistsByTitle(req.Title)
+	if err != nil {
 		return nil, fmt.Errorf("failed to check title uniqueness: %w", err)
 	}
-
-	if existingTodo != nil {
+	if exists {
 		return nil, errors.New("todo with this title already exists")
 	}
 
@@ -76,11 +72,11 @@ func (s *todoService) UpdateTodo(id uint, req *UpdateTodoRequest) (*Todo, error)
 	// 3. Update Title (if provided)
 	if req.Title != "" && req.Title != todo.Title {
 		// Check if the title is unique
-		existingTodo, err := s.todoRepo.GetByTitle(req.Title)
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		exists, err := s.todoRepo.ExistsByTitle(req.Title)
+		if err != nil {
 			return nil, fmt.Errorf("failed to check title uniqueness: %w", err)
 		}
-		if existingTodo != nil && existingTodo.ID != id {
+		if exists {
 			return nil, errors.New("todo with this title already exists")
 		}
 
