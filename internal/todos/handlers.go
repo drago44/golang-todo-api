@@ -3,6 +3,7 @@ package todos
 import (
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,16 +27,33 @@ func (h *TodoHandler) RegisterTodoRoutes(rg *gin.RouterGroup) {
 	}
 }
 
+var (
+	createTodoReqPool = sync.Pool{New: func() any { return new(CreateTodoRequest) }}
+	updateTodoReqPool = sync.Pool{New: func() any { return new(UpdateTodoRequest) }}
+)
+
+type errorResponse struct {
+	Error string `json:"error"`
+}
+
+type messageResponse struct {
+	Message string `json:"message"`
+}
+
 func (h *TodoHandler) CreateTodo(c *gin.Context) {
-	var req CreateTodoRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	req := createTodoReqPool.Get().(*CreateTodoRequest)
+	defer func() {
+		*req = CreateTodoRequest{}
+		createTodoReqPool.Put(req)
+	}()
+	if err := c.ShouldBindJSON(req); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
 		return
 	}
 
-	todo, err := h.todoService.CreateTodo(&req)
+	todo, err := h.todoService.CreateTodo(req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		return
 	}
 
@@ -45,7 +63,7 @@ func (h *TodoHandler) CreateTodo(c *gin.Context) {
 func (h *TodoHandler) GetAllTodos(c *gin.Context) {
 	todos, err := h.todoService.GetAllTodos()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		return
 	}
 
@@ -56,13 +74,13 @@ func (h *TodoHandler) GetTodoByID(c *gin.Context) {
 	// Parse the ID from the URL parameter and convert it to uint type
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		c.JSON(http.StatusBadRequest, errorResponse{Error: "Invalid ID"})
 		return
 	}
 
 	todo, err := h.todoService.GetTodoByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
+		c.JSON(http.StatusNotFound, errorResponse{Error: "Todo not found"})
 		return
 	}
 
@@ -72,19 +90,23 @@ func (h *TodoHandler) GetTodoByID(c *gin.Context) {
 func (h *TodoHandler) UpdateTodo(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		c.JSON(http.StatusBadRequest, errorResponse{Error: "Invalid ID"})
 		return
 	}
 
-	var req UpdateTodoRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	req := updateTodoReqPool.Get().(*UpdateTodoRequest)
+	defer func() {
+		*req = UpdateTodoRequest{}
+		updateTodoReqPool.Put(req)
+	}()
+	if err := c.ShouldBindJSON(req); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
 		return
 	}
 
-	todo, err := h.todoService.UpdateTodo(uint(id), &req)
+	todo, err := h.todoService.UpdateTodo(uint(id), req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
 		return
 	}
 
@@ -94,14 +116,14 @@ func (h *TodoHandler) UpdateTodo(c *gin.Context) {
 func (h *TodoHandler) DeleteTodo(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		c.JSON(http.StatusBadRequest, errorResponse{Error: "Invalid ID"})
 		return
 	}
 
 	if err := h.todoService.DeleteTodo(uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Todo deleted successfully"})
+	c.JSON(http.StatusOK, messageResponse{Message: "Todo deleted successfully"})
 }

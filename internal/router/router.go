@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/drago44/golang-todo-api/internal/todos"
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +27,8 @@ func New(engine *gin.Engine, todoHandler *todos.TodoHandler) *Router {
 func (r *Router) setupRoutes() {
 	// Simple routes
 	r.engine.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok", "message": "API is running"})
+		c.Status(http.StatusOK)
+		_, _ = c.Writer.WriteString(`{"status":"ok","message":"API is running"}`)
 	})
 
 	// API v1 group
