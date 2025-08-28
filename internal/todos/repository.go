@@ -8,7 +8,7 @@ type TodoRepository interface {
 	Create(todo *Todo) error
 	GetAll() ([]Todo, error)
 	GetByID(id uint) (*Todo, error)
-	GetByTitle(title string) (*Todo, error)
+	ExistsByTitle(title string) (bool, error)
 	Update(id uint, todo *Todo) error
 	Delete(id uint) error
 }
@@ -37,10 +37,13 @@ func (r *todoRepository) GetByID(id uint) (*Todo, error) {
 	return &todo, err
 }
 
-func (r *todoRepository) GetByTitle(title string) (*Todo, error) {
-	var todo Todo
-	err := r.db.Where("title = ?", title).First(&todo).Error
-	return &todo, err
+func (r *todoRepository) ExistsByTitle(title string) (bool, error) {
+	var t Todo
+	sel := r.db.Select("id").Where("title = ?", title).Limit(1).First(&t)
+	if sel.Error == gorm.ErrRecordNotFound {
+		return false, nil
+	}
+	return sel.Error == nil, sel.Error
 }
 
 func (r *todoRepository) Update(id uint, todo *Todo) error {

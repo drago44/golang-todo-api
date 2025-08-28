@@ -5,7 +5,7 @@ PKG      ?= ./...
 BIN_DIR  ?= bin
 MAIN     ?= cmd/server/main.go
 
-.PHONY: help test test-full-log test-short-log cover run build tidy deps fmt vet lint clean
+.PHONY: help test test-full-log test-short-log cover run build tidy deps fmt vet lint clean demo bench
 
 help:
 	@echo "Available targets:\n" \
@@ -20,7 +20,9 @@ help:
 	&& echo "  make fmt             - go fmt ./..." \
 	&& echo "  make vet             - go vet ./..." \
 	&& echo "  make lint            - golangci-lint run (if installed)" \
-	&& echo "  make clean           - clean build artifacts and coverage files"
+	&& echo "  make clean           - clean build artifacts and coverage files" \
+	&& echo "  make demo            - run demo" \
+	&& echo "  make bench           - run benchmarks (allocs, ns/op, B/op)"
 
 # Tests
 test:
@@ -73,4 +75,8 @@ lint:
 clean:
 	rm -rf $(BIN_DIR) coverage.out coverage.html
 
+demo:
+	./scripts/demo.sh
 
+bench:
+	go test -bench=. -benchmem -run=^$$ ./...

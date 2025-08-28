@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
 )
 
 // Mock implementation of TodoRepository for service unit tests
@@ -30,12 +29,9 @@ func (m *mockTodoRepository) GetByID(id uint) (*Todo, error) {
 	return nil, args.Error(1)
 }
 
-func (m *mockTodoRepository) GetByTitle(title string) (*Todo, error) {
+func (m *mockTodoRepository) ExistsByTitle(title string) (bool, error) {
 	args := m.Called(title)
-	if v := args.Get(0); v != nil {
-		return v.(*Todo), args.Error(1)
-	}
-	return nil, args.Error(1)
+	return args.Bool(0), args.Error(1)
 }
 
 func (m *mockTodoRepository) Update(id uint, todo *Todo) error {
@@ -55,8 +51,8 @@ func TestCreateTodo_Success(t *testing.T) {
 	req := &CreateTodoRequest{Title: "Test", Description: "desc"}
 	t.Logf("CreateTodo: preparing request: %+v", req)
 
-	// Simulate title not found
-	mockRepo.On("GetByTitle", "Test").Return(nil, gorm.ErrRecordNotFound).Once()
+	// Simulate title does not exist
+	mockRepo.On("ExistsByTitle", "Test").Return(false, nil).Once()
 	// Expect create to be called
 	mockRepo.On("Create", mock.MatchedBy(func(todo *Todo) bool {
 		return todo.Title == "Test" && todo.Description == "desc" && todo.Completed == false
@@ -87,7 +83,7 @@ func TestCreateTodo_TitleExists(t *testing.T) {
 	mockRepo := new(mockTodoRepository)
 	service := NewTodoService(mockRepo)
 
-	mockRepo.On("GetByTitle", "Dup").Return(&Todo{ID: 10, Title: "Dup"}, nil).Once()
+	mockRepo.On("ExistsByTitle", "Dup").Return(true, nil).Once()
 
 	_, err := service.CreateTodo(&CreateTodoRequest{Title: "Dup"})
 	assert.Error(t, err)
@@ -97,11 +93,11 @@ func TestCreateTodo_TitleExists(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestCreateTodo_GetByTitleDbError(t *testing.T) {
+func TestCreateTodo_ExistsByTitleDbError(t *testing.T) {
 	mockRepo := new(mockTodoRepository)
 	service := NewTodoService(mockRepo)
 
-	mockRepo.On("GetByTitle", "X").Return(nil, errors.New("db down")).Once()
+	mockRepo.On("ExistsByTitle", "X").Return(false, errors.New("db down")).Once()
 
 	_, err := service.CreateTodo(&CreateTodoRequest{Title: "X"})
 	assert.Error(t, err)
@@ -164,7 +160,7 @@ func TestUpdateTodo_TitleConflict(t *testing.T) {
 	service := NewTodoService(mockRepo)
 
 	mockRepo.On("GetByID", uint(5)).Return(&Todo{ID: 5, Title: "Old"}, nil).Once()
-	mockRepo.On("GetByTitle", "New").Return(&Todo{ID: 6, Title: "New"}, nil).Once()
+	mockRepo.On("ExistsByTitle", "New").Return(true, nil).Once()
 
 	_, err := service.UpdateTodo(5, &UpdateTodoRequest{Title: "New"})
 	assert.Error(t, err)
