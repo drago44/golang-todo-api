@@ -38,11 +38,12 @@ func (r *todoRepository) GetByID(id uint) (*Todo, error) {
 }
 
 func (r *todoRepository) ExistsByTitle(title string) (bool, error) {
-	var count int64
-	if err := r.db.Model(&Todo{}).Where("title = ?", title).Count(&count).Error; err != nil {
-		return false, err
+	var t Todo
+	sel := r.db.Select("id").Where("title = ?", title).Limit(1).First(&t)
+	if sel.Error == gorm.ErrRecordNotFound {
+		return false, nil
 	}
-	return count > 0, nil
+	return sel.Error == nil, sel.Error
 }
 
 func (r *todoRepository) Update(id uint, todo *Todo) error {
