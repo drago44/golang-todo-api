@@ -1,0 +1,36 @@
+version: 2
+
+run:
+  timeout: 3m
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - ineffassign
+    - revive
+    - gocritic
+    - unused
+    - whitespace
+
+formatters:
+  enable:
+    - gofumpt
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters-settings:
+  revive:
+    rules:
+      - name: indent-error-flow
+      - name: early-return
+      - name: var-naming
+      - name: import-shadowing
+
+formatters-settings:
+  gofumpt:
+    extra-rules: true

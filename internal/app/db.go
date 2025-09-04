@@ -35,12 +35,14 @@ func Init(cfg *DatabaseConfig) (*gorm.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("opening sqlite at %s: %w", dsn, err)
 	}
+
 	if sqlDB, err2 := db.DB(); err2 == nil {
 		sqlDB.SetMaxOpenConns(4)
 		sqlDB.SetMaxIdleConns(4)
 		sqlDB.SetConnMaxLifetime(5 * time.Minute)
 		sqlDB.SetConnMaxIdleTime(2 * time.Minute)
 	}
+
 	return db, nil
 }
 
@@ -55,15 +57,18 @@ func ensureSQLitePragmas(dsn string) string {
 	if strings.Contains(dsn, "?") {
 		sep = "&"
 	}
+
 	addOpt := func(s, key, pair string) (string, string) {
 		if strings.Contains(strings.ToLower(s), strings.ToLower(key+"=")) {
 			return s, sep
 		}
+
 		if sep == "?" {
 			s += "?" + pair
 		} else {
 			s += "&" + pair
 		}
+
 		return s, "&"
 	}
 	out := dsn
@@ -72,5 +77,6 @@ func ensureSQLitePragmas(dsn string) string {
 	out, sep = addOpt(out, "_busy_timeout", "_busy_timeout=5000")
 	out, sep = addOpt(out, "_cache_size", "_cache_size=-20000")
 	out, _ = addOpt(out, "_foreign_keys", "_foreign_keys=ON")
+
 	return out
 }
