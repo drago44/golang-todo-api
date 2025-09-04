@@ -4,8 +4,10 @@ APP_NAME ?= golang-todo-api
 PKG      ?= ./...
 BIN_DIR  ?= bin
 MAIN     ?= cmd/server/main.go
+GOPATH_BIN := $(shell go env GOPATH)/bin
+SWAG_RUN   := go run github.com/swaggo/swag/cmd/swag@v1.16.6
 
-.PHONY: help test test-full-log test-short-log cover run build tidy deps fmt vet lint clean demo bench
+.PHONY: help test test-full-log test-short-log cover run build tidy deps fmt vet lint clean demo bench swagger
 
 help:
 	@echo "Available targets:\n" \
@@ -15,6 +17,7 @@ help:
 	&& echo "  make cover           - coverage profile + HTML report" \
 	&& echo "  make run             - run server from $(MAIN)" \
 	&& echo "  make build           - build binary to $(BIN_DIR)/$(APP_NAME)" \
+	&& echo "  make swagger         - generate Swagger docs (requires swag)" \
 	&& echo "  make tidy            - go mod tidy" \
 	&& echo "  make deps            - go mod download" \
 	&& echo "  make fmt             - go fmt ./..." \
@@ -46,10 +49,12 @@ cover:
 
 # App lifecycle
 run:
+	$(MAKE) swagger-go
 	go run $(MAIN)
 
 build:
 	mkdir -p $(BIN_DIR)
+	$(MAKE) swagger-go
 	go build -o $(BIN_DIR)/$(APP_NAME) $(MAIN)
 
 # Maintenance
@@ -80,3 +85,9 @@ demo:
 
 bench:
 	go test -bench=. -benchmem -run=^$$ ./...
+
+swagger-go:
+	$(SWAG_RUN) init -g cmd/server/main.go -o docs/swagger -d . --outputTypes go --parseInternal
+
+swagger-full:
+	$(SWAG_RUN) init -g cmd/server/main.go -o docs/swagger -d . --outputTypes go,json,yaml --parseInternal

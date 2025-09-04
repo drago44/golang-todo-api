@@ -10,14 +10,18 @@ import (
 
 func createTestDB(t *testing.T) *gorm.DB {
 	t.Helper()
+
 	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("failed to open sqlite memory: %v", err)
 	}
+
 	if err := db.AutoMigrate(&Todo{}); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
+
 	t.Log("sqlite memory database created and migrated")
+
 	return db
 }
 
@@ -56,7 +60,7 @@ func TestRepository_CRUD(t *testing.T) {
 
 	// Update
 	got.Description = "new"
-	assert.NoError(t, repo.Update(got.ID, got))
+	assert.NoError(t, repo.Update(got))
 	t.Log("updated description to 'new'")
 
 	got2, err := repo.GetByID(todo.ID)

@@ -26,6 +26,7 @@ func (m *mockTodoRepository) GetByID(id uint) (*Todo, error) {
 	if v := args.Get(0); v != nil {
 		return v.(*Todo), args.Error(1)
 	}
+
 	return nil, args.Error(1)
 }
 
@@ -34,8 +35,8 @@ func (m *mockTodoRepository) ExistsByTitle(title string) (bool, error) {
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *mockTodoRepository) Update(id uint, todo *Todo) error {
-	args := m.Called(id, todo)
+func (m *mockTodoRepository) Update(todo *Todo) error {
+	args := m.Called(todo)
 	return args.Error(0)
 }
 
@@ -178,7 +179,8 @@ func TestUpdateTodo_Success(t *testing.T) {
 
 	completed := true
 	req := &UpdateTodoRequest{Description: "new", Completed: &completed}
-	mockRepo.On("Update", uint(9), mock.MatchedBy(func(todo *Todo) bool {
+
+	mockRepo.On("Update", mock.MatchedBy(func(todo *Todo) bool {
 		return todo.Description == "new" && todo.Completed == true && todo.Title == "T"
 	})).Return(nil).Once()
 

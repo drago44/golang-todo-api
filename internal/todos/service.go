@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// TodoService defines business logic for managing todos.
 type TodoService interface {
 	CreateTodo(req *CreateTodoRequest) (*Todo, error)
 	GetAllTodos() ([]Todo, error)
@@ -17,14 +18,22 @@ type todoService struct {
 	todoRepo TodoRepository
 }
 
+// NewTodoService constructs a TodoService with the provided repository.
 func NewTodoService(todoRepo TodoRepository) TodoService {
 	return &todoService{todoRepo: todoRepo}
 }
 
+// Domain errors returned by TodoService and repository.
+var (
+	ErrTitleRequired = errors.New("title is required")
+	ErrTitleExists   = errors.New("todo with this title already exists")
+	ErrNotFound      = errors.New("todo not found")
+)
+
 func (s *todoService) CreateTodo(req *CreateTodoRequest) (*Todo, error) {
 	// 1. Check if title is required
 	if req.Title == "" {
-		return nil, errors.New("title is required")
+		return nil, ErrTitleRequired
 	}
 
 	// 2. Check if title already exists in the database
@@ -33,7 +42,7 @@ func (s *todoService) CreateTodo(req *CreateTodoRequest) (*Todo, error) {
 		return nil, fmt.Errorf("failed to check title uniqueness: %w", err)
 	}
 	if exists {
-		return nil, errors.New("todo with this title already exists")
+		return nil, ErrTitleExists
 	}
 
 	// 3. Create a new Todo
@@ -77,7 +86,7 @@ func (s *todoService) UpdateTodo(id uint, req *UpdateTodoRequest) (*Todo, error)
 			return nil, fmt.Errorf("failed to check title uniqueness: %w", err)
 		}
 		if exists {
-			return nil, errors.New("todo with this title already exists")
+			return nil, ErrTitleExists
 		}
 
 		todo.Title = req.Title
@@ -102,7 +111,7 @@ func (s *todoService) UpdateTodo(id uint, req *UpdateTodoRequest) (*Todo, error)
 	}
 
 	// 7. Save the changes
-	if err := s.todoRepo.Update(id, todo); err != nil {
+	if err := s.todoRepo.Update(todo); err != nil {
 		return nil, err
 	}
 
