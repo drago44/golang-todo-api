@@ -46,11 +46,7 @@ pretty() {
 # Run tests if requested
 if [[ "$RUN_TESTS" == "true" ]]; then
   echo "==> Running unit tests"
-  if command -v richgo >/dev/null 2>&1; then
-    make -C "$ROOT_DIR" test-full-log | sed 's/^/    /'
-  else
     make -C "$ROOT_DIR" test | sed 's/^/    /'
-  fi
 fi
 
 echo

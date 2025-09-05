@@ -7,20 +7,19 @@ MAIN     ?= cmd/server/main.go
 GOPATH_BIN := $(shell go env GOPATH)/bin
 SWAG_RUN   := go run github.com/swaggo/swag/cmd/swag@v1.16.6
 
-.PHONY: help test test-full-log test-short-log cover run build tidy deps fmt vet lint clean demo bench swagger
+.PHONY: help test test-short cover run build tidy deps fmt vet lint clean demo bench swagger
 
 help:
 	@echo "Available targets:\n" \
-	&& echo "  make test            - go test ./... -v -count=1" \
-	&& echo "  make test-full-log   - richgo test ./... -v -count=1" \
-	&& echo "  make test-short-log  - gotestsum --format short-verbose -- -count=1 ./..." \
+	&& echo "  make test            - richgo test (fallback: go test)" \
+	&& echo "  make test-short       - gotestsum short-verbose (fallback: go test)" \
 	&& echo "  make cover           - coverage profile + HTML report" \
 	&& echo "  make run             - run server from $(MAIN)" \
 	&& echo "  make build           - build binary to $(BIN_DIR)/$(APP_NAME)" \
 	&& echo "  make swagger         - generate Swagger docs (requires swag)" \
 	&& echo "  make tidy            - go mod tidy" \
 	&& echo "  make deps            - go mod download" \
-	&& echo "  make fmt             - go fmt ./..." \
+	&& echo "  make fmt             - apply formatting (gofumpt ./...)" \
 	&& echo "  make vet             - go vet ./..." \
 	&& echo "  make lint            - golangci-lint run (if installed)" \
 	&& echo "  make clean           - clean build artifacts and coverage files" \
@@ -29,17 +28,24 @@ help:
 
 # Tests
 test:
-	go test $(PKG) -v -count=1
+	@if command -v richgo >/dev/null 2>&1; then \
+		richgo test $(PKG) -v -count=1; \
+	else \
+		echo "richgo not installed. Falling back to go test"; \
+		go test $(PKG) -v -count=1; \
+	fi
 
-test-full-log:
-	richgo test $(PKG) -v -count=1
-
-test-short-log:
-	gotestsum --format short-verbose -- -count=1 $(PKG)
+test-short:
+	@if command -v gotestsum >/dev/null 2>&1; then \
+		gotestsum --format short-verbose -- -count=1 $(PKG); \
+	else \
+		echo "gotestsum not installed. Falling back to go test"; \
+		go test $(PKG) -v -count=1; \
+	fi
 
 # Coverage
 cover:
-	go test $(PKG) -coverprofile=coverage.out -covermode=atomic
+	go test $(PKG) -coverprofile=coverage.out -covermode=set
 	@echo
 	@echo "Coverage summary:"
 	go tool cover -func=coverage.out | tail -n 1
@@ -65,7 +71,11 @@ deps:
 	go mod download
 
 fmt:
-	go fmt ./...
+	if command -v gofumpt >/dev/null 2>&1; then \
+		gofumpt -w ./; \
+	else \
+		go fmt ./...; \
+	fi
 
 vet:
 	go vet ./...
