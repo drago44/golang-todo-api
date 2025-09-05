@@ -10,10 +10,11 @@ if [[ "$first_line" =~ ^(Merge|Revert|fixup!|squash!) ]]; then
   exit 0
 fi
 
-# Extract ticket from branch if present: BE-/FS-/FE- followed by digits
+# Extract ticket from branch if present: BE-/FS-/FE- followed by digits (force uppercase)
 branch_name=$(git rev-parse --abbrev-ref HEAD)
+branch_upper=$(printf "%s" "$branch_name" | tr '[:lower:]' '[:upper:]')
 ticket=""
-if [[ "$branch_name" =~ ^((BE|FS|FE)-[0-9]+) ]]; then
+if [[ "$branch_upper" =~ ^((BE|FS|FE)-[0-9]+) ]]; then
   ticket="${BASH_REMATCH[1]}"
 fi
 
@@ -22,7 +23,7 @@ if [[ "$first_line" =~ ^(BE|FS|FE)-[0-9]+\b ]]; then
   exit 0
 fi
 
-# If we have a ticket from branch, auto-prefix it to the first line
+# If we have a ticket from branch, auto-prefix it to the first line, preserving existing text
 if [[ -n "$ticket" ]]; then
   rest=$(sed '1d' "$msg_file")
   printf "%s %s\n" "$ticket" "$first_line" > "$msg_file"
