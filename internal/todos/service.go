@@ -14,16 +14,6 @@ type TodoService interface {
 	DeleteTodo(id uint) error
 }
 
-
-
-
-
-
-
-
-
-
-
 type todoService struct {
 	todoRepo TodoRepository
 }
