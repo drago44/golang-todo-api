@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// TodoService defines business logic for managing todos
+// TodoService defines business logic for managing todos.
 type TodoService interface {
 	CreateTodo(req *CreateTodoRequest) (*Todo, error)
 	GetAllTodos() ([]Todo, error)
