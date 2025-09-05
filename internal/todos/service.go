@@ -5,6 +5,9 @@ import (
 	"fmt"
 )
 
+
+
+
 // TodoService defines business logic for managing todos.
 type TodoService interface {
 	CreateTodo(req *CreateTodoRequest) (*Todo, error)
@@ -13,25 +16,6 @@ type TodoService interface {
 	UpdateTodo(id uint, req *UpdateTodoRequest) (*Todo, error)
 	DeleteTodo(id uint) error
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 type todoService struct {
 	todoRepo TodoRepository
