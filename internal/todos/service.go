@@ -18,30 +18,6 @@ type todoService struct {
 	todoRepo TodoRepository
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // NewTodoService constructs a TodoService with the provided repository.
 func NewTodoService(todoRepo TodoRepository) TodoService {
 	return &todoService{todoRepo: todoRepo}
