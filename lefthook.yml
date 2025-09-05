@@ -1,0 +1,25 @@
+# Lefthook configuration
+# See: https://github.com/evilmartians/lefthook
+pre-commit:
+  parallel: false
+  commands:
+    branch-name:
+      run: bash scripts/git-validate-branch.sh
+    fmt:
+      run: bash scripts/fmt-staged.sh
+    vet:
+      run: make vet
+    tests-short:
+      run: make test-short
+    lint:
+      run: make lint
+
+pre-push:
+  commands:
+    tests-short:
+      run: make test-short
+
+commit-msg:
+  commands:
+    msg:
+      run: bash scripts/git-validate-commit-msg.sh {1}
