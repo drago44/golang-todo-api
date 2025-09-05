@@ -10,3 +10,9 @@ files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.go$' || tr
 echo "Formatting with $(basename "$fmt_bin")" >&2
 echo "$files" | xargs "$fmt_bin" -w
 echo "$files" | xargs git add --
+
+# Abort commit if no staged changes remain after formatting
+if git diff --cached --quiet; then
+  echo "No staged changes after formatting. Aborting commit." >&2
+  exit 1
+fi
