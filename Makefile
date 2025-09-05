@@ -7,7 +7,7 @@ MAIN     ?= cmd/server/main.go
 GOPATH_BIN := $(shell go env GOPATH)/bin
 SWAG_RUN   := go run github.com/swaggo/swag/cmd/swag@v1.16.6
 
-.PHONY: help test test-short cover run build tidy deps fmt fmt-check vet lint clean demo bench swagger
+.PHONY: help test test-short cover run build tidy deps fmt vet lint clean demo bench swagger
 
 help:
 	@echo "Available targets:\n" \
@@ -19,8 +19,7 @@ help:
 	&& echo "  make swagger         - generate Swagger docs (requires swag)" \
 	&& echo "  make tidy            - go mod tidy" \
 	&& echo "  make deps            - go mod download" \
-	&& echo "  make fmt             - apply formatting (go fmt ./...)" \
-	&& echo "  make fmt-check       - check formatting only; fail if changes needed" \
+	&& echo "  make fmt             - apply formatting (gofumpt ./...)" \
 	&& echo "  make vet             - go vet ./..." \
 	&& echo "  make lint            - golangci-lint run (if installed)" \
 	&& echo "  make clean           - clean build artifacts and coverage files" \
