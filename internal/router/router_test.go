@@ -56,7 +56,7 @@ func TestRouter_HealthAndTodosRoute(t *testing.T) {
 	mockSvc.On("GetAllTodos").Return([]todos.Todo{}, nil).Once()
 	h := todos.NewTodoHandler(mockSvc)
 
-	r := New(engine, h, true)
+	r := New(engine, h, false)
 
 	// Health
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)

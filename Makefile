@@ -71,7 +71,7 @@ deps:
 	go mod download
 
 fmt:
-	if command -v gofumpt >/dev/null 2>&1; then \
+	@if command -v gofumpt >/dev/null 2>&1; then \
 		gofumpt -w ./; \
 	else \
 		go fmt ./...; \
