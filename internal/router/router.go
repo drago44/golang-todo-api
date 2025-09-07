@@ -1,3 +1,4 @@
+// Package router wires HTTP routes for the API.
 package router
 
 import (
@@ -5,19 +6,23 @@ import (
 
 	"github.com/drago44/golang-todo-api/internal/todos"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// Router is a struct that contains the engine and the todo handler
+// Router contains the Gin engine and handlers configuration.
 type Router struct {
-	engine      *gin.Engine
-	todoHandler *todos.TodoHandler
+	engine         *gin.Engine
+	todoHandler    *todos.TodoHandler
+	swaggerEnabled bool
 }
 
-// New creates a new router, receiving the handlers through DI
-func New(engine *gin.Engine, todoHandler *todos.TodoHandler) *Router {
+// New creates a new Router and sets up routes.
+func New(engine *gin.Engine, todoHandler *todos.TodoHandler, swaggerEnabled bool) *Router {
 	r := &Router{
-		engine:      engine,
-		todoHandler: todoHandler,
+		engine:         engine,
+		todoHandler:    todoHandler,
+		swaggerEnabled: swaggerEnabled,
 	}
 	r.setupRoutes()
 	return r
@@ -27,9 +32,13 @@ func New(engine *gin.Engine, todoHandler *todos.TodoHandler) *Router {
 func (r *Router) setupRoutes() {
 	// Simple routes
 	r.engine.GET("/health", func(c *gin.Context) {
-		c.Status(http.StatusOK)
-		_, _ = c.Writer.WriteString(`{"status":"ok","message":"API is running"}`)
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "message": "API is running"})
 	})
+
+	if r.swaggerEnabled {
+		// Serve Swagger UI using generated docs package
+		r.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 
 	// API v1 group
 	v1 := r.engine.Group("/api/v1")

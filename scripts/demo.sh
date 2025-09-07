@@ -46,11 +46,7 @@ pretty() {
 # Run tests if requested
 if [[ "$RUN_TESTS" == "true" ]]; then
   echo "==> Running unit tests"
-  if command -v richgo >/dev/null 2>&1; then
-    make -C "$ROOT_DIR" test-full-log | sed 's/^/    /'
-  else
     make -C "$ROOT_DIR" test | sed 's/^/    /'
-  fi
 fi
 
 echo
@@ -161,17 +157,17 @@ echo
 echo "==> Demo API calls"
 
 echo "-- Create todo A"
-curl -sS -X POST "${BASE_URL}/api/v1/todos/" \
+curl -sS -X POST "${BASE_URL}/api/v1/todos" \
   -H 'Content-Type: application/json' \
   -d '{"title":"A","description":"first"}' | pretty
 
 echo "-- Create duplicate A (expect error)"
-curl -sS -X POST "${BASE_URL}/api/v1/todos/" \
+curl -sS -X POST "${BASE_URL}/api/v1/todos" \
   -H 'Content-Type: application/json' \
   -d '{"title":"A","description":"dup"}' | pretty
 
 echo "-- List todos"
-curl -sS "${BASE_URL}/api/v1/todos/" | pretty
+curl -sS "${BASE_URL}/api/v1/todos" | pretty
 
 echo "-- Update todo id=1"
 curl -sS -X PUT "${BASE_URL}/api/v1/todos/1" \
@@ -185,12 +181,10 @@ echo "-- Delete todo id=1"
 curl -sS -X DELETE "${BASE_URL}/api/v1/todos/1" | pretty
 
 echo "-- List todos after delete"
-curl -sS "${BASE_URL}/api/v1/todos/" | pretty
+curl -sS "${BASE_URL}/api/v1/todos" | pretty
 
 echo "-- Show all todos including soft-deleted (direct DB check)"
 echo "    Note: This shows the actual database state including soft-deleted records"
 sqlite3 "${DB_PATH}" "SELECT id, title, description, completed, deleted_at FROM todos;" 2>/dev/null || echo "    SQLite3 not available, but records are stored with soft delete"
 
 echo "\n==> Demo complete"
-
-
