@@ -42,6 +42,7 @@ func Run() {
 	if err := container.Provide(func() *gorm.DB { return db }); err != nil {
 		log.Fatal(err)
 	}
+
 	if err := container.Provide(func(cfg *Config) *gin.Engine {
 		// Mode
 		mode := cfg.Server.GinMode
@@ -49,6 +50,7 @@ func Run() {
 			mode = gin.ReleaseMode
 		}
 		gin.SetMode(mode)
+
 		engine := gin.New()
 		if cfg.Server.EnableLogger {
 			engine.Use(Logger())
@@ -82,6 +84,7 @@ func Run() {
 
 	if err := container.Invoke(func(router *router.Router, cfg *Config) {
 		addr := cfg.Server.Host + ":" + cfg.Server.Port
+
 		// Determine the public scheme from config; fallback by port if not set
 		protocol := cfg.Server.PublicScheme
 		if protocol == "" {
@@ -116,6 +119,7 @@ func Run() {
 			IdleTimeout:       60 * time.Second,
 			MaxHeaderBytes:    1 << 20,
 		}
+
 		// Start the server in a goroutine
 		go func() {
 			if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -133,6 +137,7 @@ func Run() {
 		defer cancel()
 		if err := srv.Shutdown(ctx); err != nil {
 			log.Printf("Server forced to shutdown: %v", err)
+
 		}
 	}); err != nil {
 		log.Fatal(err)

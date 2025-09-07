@@ -188,5 +188,3 @@ echo "    Note: This shows the actual database state including soft-deleted reco
 sqlite3 "${DB_PATH}" "SELECT id, title, description, completed, deleted_at FROM todos;" 2>/dev/null || echo "    SQLite3 not available, but records are stored with soft delete"
 
 echo "\n==> Demo complete"
-
-

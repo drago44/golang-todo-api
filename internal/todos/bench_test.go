@@ -44,11 +44,12 @@ func BenchmarkCreateAndList(b *testing.B) {
 	h.RegisterTodoRoutes(rg)
 
 	b.ReportAllocs()
-
+ 
 	for i := 0; i < b.N; i++ {
 		// Create
 		body := CreateTodoRequest{Title: "t-" + itoa(i+1), Description: "d"}
 		buf, _ := json.Marshal(body)
+
 		req := httptest.NewRequest(http.MethodPost, "/todos", bytes.NewReader(buf))
 		req.Header.Set("Content-Type", "application/json")
 
@@ -58,6 +59,7 @@ func BenchmarkCreateAndList(b *testing.B) {
 		if w.Code != http.StatusCreated {
 			b.Fatalf("create status=%d", w.Code)
 		}
+    
 		// List
 		req2 := httptest.NewRequest(http.MethodGet, "/todos", nil)
 		w2 := httptest.NewRecorder()

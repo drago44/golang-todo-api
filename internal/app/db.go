@@ -77,6 +77,6 @@ func ensureSQLitePragmas(dsn string) string {
 	out, sep = addOpt(out, "_busy_timeout", "_busy_timeout=5000")
 	out, sep = addOpt(out, "_cache_size", "_cache_size=-20000")
 	out, _ = addOpt(out, "_foreign_keys", "_foreign_keys=ON")
-
+ 
 	return out
 }
