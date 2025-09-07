@@ -137,7 +137,6 @@ func Run() {
 		defer cancel()
 		if err := srv.Shutdown(ctx); err != nil {
 			log.Printf("Server forced to shutdown: %v", err)
-
 		}
 	}); err != nil {
 		log.Fatal(err)
