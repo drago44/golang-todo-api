@@ -327,10 +327,6 @@ go tool pprof mem.prof
 - **Developer Experience** - Automated formatting, linting, git hooks
 - **Documentation** - Comprehensive docs for all aspects of the project
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## 🙏 Acknowledgments
 
 - [Gin Web Framework](https://gin-gonic.com/) - For the excellent HTTP framework
